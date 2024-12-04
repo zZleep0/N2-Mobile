@@ -6,9 +6,9 @@ public class PlayerController : MonoBehaviour
 {
     public LevelManager levelManager;
     public ItemProps itemProp;
+    public SoundManager soundManager;
 
-    private bool isDragging = false;
-    private Vector3 offset;
+    public bool canMove = true;
 
     public LayerMask itemLayer;
     private bool interagindoComItem = false; // Controle para evitar texto repetido
@@ -19,7 +19,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        soundManager = GameObject.Find("SCRIPTS").GetComponent<SoundManager>();
     }
 
     // Update is called once per frame
@@ -42,37 +42,33 @@ public class PlayerController : MonoBehaviour
         //    //transform.Translate(new Vector2(moveDirection.transform.position.x, moveDirection.transform.position.y) * Time.deltaTime * velocidade);
         //}
 
-        if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && canMove == true)
         {
             Touch touch = Input.GetTouch(0);
-            Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
-
-            switch (touch.phase)
+            if (touch.phase == TouchPhase.Began)
             {
-                case TouchPhase.Began:
-                    Collider2D touchedCollider = Physics2D.OverlapPoint(touchPosition);
-                    if (touchedCollider != null && touchedCollider.transform == transform)
-                    {
-                        isDragging = true;
-                        offset = transform.position - touchPosition;
-                    }
-                    break;
-                case TouchPhase.Moved:
-                    if (isDragging)
-                    {
-                        transform.position = touchPosition + offset;
-                    }
-                    break;
-                case TouchPhase.Ended:
-                    {
-                        if (isDragging)
-                        {
-                            isDragging = false;
-                        }
-                        break;
-                    }
+                // Obtém a posição do toque na tela e converte para o mundo
+                Vector3 touchPosition = Camera.main.ScreenToWorldPoint(touch.position);
+                touchPosition.z = 0; // Garante que a posição Z seja zero (2D)
+
+                StopAllCoroutines(); // Para qualquer movimento anterior
+                StartCoroutine(MoveToPosition(touchPosition));
             }
         }
+    }
+
+    IEnumerator MoveToPosition(Vector3 targetPosition)
+    {
+        float speed = 5f; // Velocidade do movimento
+        while (Vector3.Distance(transform.position, targetPosition) > 0.1f) // Checa se está perto do destino
+        {
+            // Move o jogador na direção do alvo com base na velocidade e no deltaTime
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+            yield return null; // Espera o próximo frame
+        }
+
+        // Ajusta a posição final para garantir que seja exatamente no destino
+        transform.position = targetPosition;
     }
 
     void Interacao()
@@ -85,6 +81,8 @@ public class PlayerController : MonoBehaviour
             if (itemProp != null && !interagindoComItem)
             {
                 interagindoComItem = true; // Marca que estamos interagindo
+                canMove = false;
+
                 levelManager.botoes.SetActive(true);
                 levelManager.pnlInteracao.SetActive(true);
 
@@ -141,6 +139,10 @@ public class PlayerController : MonoBehaviour
 
             // Atualiza a imagem correspondente no Canvas
             levelManager.AtualizarImagemInventario(itemProp);
+            soundManager.PlaySound(SoundManager.SoundType.TypeCollect);
+
+            itemProp.GetComponent<Renderer>().enabled = false;
+            itemProp.GetComponent<CircleCollider2D>().enabled = false;
 
             if (itemProp.itemID == 5)
             {
@@ -158,7 +160,10 @@ public class PlayerController : MonoBehaviour
     public void SairInteracao()
     {
         Debug.Log("Saiu da interacao");
+
         interagindoComItem = false; // Reseta o estado de interação
+        canMove = true;
+
         levelManager.pnlInteracao.SetActive(false);
 
     }

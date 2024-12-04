@@ -6,13 +6,13 @@ using UnityEngine.UI;
 
 public class ButtonManager : MonoBehaviour
 {
-    //[SerializeField] private SoundManager soundManager;
+    [SerializeField] private SoundManager soundManager;
 
     public int cenaAtual;
 
     private void Start()
     {
-        //soundManager = GetComponent<SoundManager>();
+        soundManager = GetComponent<SoundManager>();
         cenaAtual = SceneManager.GetActiveScene().buildIndex;
     }
 
@@ -21,7 +21,7 @@ public class ButtonManager : MonoBehaviour
     #region Menu inicial
     public void Fase1()
     {
-        //soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
+        soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
         SceneManager.LoadScene("Fase 1");
     }
 
@@ -38,25 +38,25 @@ public class ButtonManager : MonoBehaviour
     #region In Game
     public void Reiniciar()
     {
-        //soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
+        soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
         SceneManager.LoadScene(cenaAtual);
     }
 
     public void Menu()
     {
-        //soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
+        soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
         SceneManager.LoadScene("Menu");
     }
 
     public void ProximoNivel()
     {
-        //soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
+        soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
         Debug.Log("Foi para o proximo");
     }
 
     public void Pause()
     {
-        //soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
+        soundManager.PlaySound(SoundManager.SoundType.TypeBTN);
     }
 
     #endregion
